@@ -1,0 +1,266 @@
+Q. Employee Management System
+
+public class Employee {
+	static int idGenerator=1000;
+	int id;
+	String name;
+	double salary;
+	static int empCount=0;
+	static double raisePercentage;
+	public Employee(String name, double salary) {
+		super();
+		this.name = name;
+		this.salary = salary;
+		this.id=idGenerator++;
+		empCount++;
+	}
+	public void displayEmployee() {
+		System.out.println("Employee ID"+this.id+"Name"+this.name);
+	}
+	
+	public static void displayTotalEmp() {
+		System.out.println("Total Number of Employee: "+empCount);
+	}
+	
+	public static void setRaise(int amount) {
+		raisePercentage=amount;
+	}
+	
+	public void applyRaise() {
+		double hike=salary*(raisePercentage/100);
+		salary=salary+hike;
+	}
+	
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public double getSalary() {
+		return salary;
+	}
+	public void setSalary(double salary) {
+		this.salary = salary;
+	}
+	@Override
+	public String toString() {
+		return "Employee [id=" + id + ", name=" + name + ", salary=" + salary + "]";
+	}
+}
+
+
+public class Manager extends Employee {
+	String deptName;
+
+	public Manager(String name, double salary, String deptName) {
+		super(name, salary);
+		this.deptName = deptName;
+	}
+
+	@Override
+	public void displayEmployee() {
+		System.out.println("Employee ID"+this.id+"Name"+this.name+"Department"+this.deptName);
+	}
+	
+}
+
+
+import java.util.ArrayList;
+
+public class Department {
+	String deptName;
+	ArrayList<Employee> employees;
+	public Department(String deptName) {
+		super();
+		this.deptName = deptName;
+		this.employees = new ArrayList<Employee>();
+	}
+	
+	public String getDeptName() {
+		return this.deptName;
+	}
+	
+	public void addEmployee(Employee e) {
+		employees.add(e);
+		System.out.println("Employee added Successfully");
+	}
+	
+	public void removeEmployee(int id) {
+		for(Employee e:employees) {
+			if(e.getId()==id) {
+				employees.remove(e);
+				Employee.empCount--;
+				System.out.println("Employee remove successfully");
+				return;
+			}
+		}
+		System.out.println("Employee with id not found");
+	}
+	
+	public void displayAll() {
+		for(Employee e: employees) {
+			System.out.println(e);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return "Department [deptName=" + deptName + ", employees=" + employees + "]";
+	}
+	
+}
+
+
+
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class CompanyHR {
+	ArrayList<Department>departments;
+	Scanner sc= new Scanner(System.in);
+	public CompanyHR() {
+		departments= new ArrayList<Department>();
+	}
+	
+	public void addDepartment() {
+		System.out.println("Enter Department name: ");
+		String dname=sc.next();
+		Department d=new Department(dname);
+		System.out.println("Depatment added successfully");
+	}
+	
+	public void displayDepartment() {
+		for(Department d:departments) {
+			System.out.println(d);
+		}
+	}
+	
+	public void addEmployeeToDept() {
+		System.out.println("Enter the dept name");
+		String dname=sc.next();
+		for(Department d: departments) {
+			if(d.getDeptName().equals(dname)) {
+				System.out.println("1.Employee 2.Manager");
+				System.out.println("Enter your choice");
+				int ch=sc.nextInt();
+				System.out.println("Enter name and slary od emp");
+				String name=sc.next();
+				double sal=sc.nextDouble();
+				if(ch==2) {
+					System.out.println("Enter Department Name");
+					String deptName=sc.next();
+					Employee e= new Manager(name, sal, deptName);
+					d.addEmployee(e);
+					System.out.println("Employee Added Successfully");
+					return;
+				}else {
+					Employee e1=new Employee(name, sal);
+					d.addEmployee(e1);
+					System.out.println("Employee added successfully");
+					return;
+				}
+			}
+		}
+		System.out.println("Department with given name not found");
+	}
+	public void removeEmployeeFromDept() {
+		System.out.println("Enter Department Name");
+		String name=sc.next();
+		for(Department d: departments) {
+			if(d.getDeptName().equalsIgnoreCase(name)) {
+				System.out.println("Enter Id of Employee");
+				int id=sc.nextInt();
+				d.removeEmployee(id);
+				System.out.println("Employee removed Successfully");
+				return;
+			}
+		}
+		System.out.println("Department Not found with id");
+	}
+	
+	public void displayDepartmentEmp() {
+		System.out.println("Enter DeptName");
+		String dname=sc.next();
+		for(Department d:departments) {
+			if(d.getDeptName().equalsIgnoreCase(dname)) {
+				d.displayAll();
+			}
+		}
+	}
+	
+	public void applyRaiseToAll() {
+		System.out.println("Enter the hike Percentage");
+		Employee.raisePercentage=sc.nextDouble();
+		for(Department d:departments) {
+			for(Employee e: d.employees) {
+				e.applyRaise();
+			}
+		}
+	}
+	
+	public void displayEmployeeCount() {
+		System.out.println("Total Employee count: "+Employee.empCount);
+	}
+}
+
+
+
+import java.util.Scanner;
+
+public class Tester {
+	public static void main(String[] args) {
+		int ch=0;
+		Scanner sc= new Scanner(System.in);
+		CompanyHR obj= new CompanyHR();
+		System.out.println("welcome Employee management system");
+		do {
+			System.out.println("""
+					================================================
+					1.ADD Dept 2. Add Employee 3. Remove Emp 4. Dispaly dept emp
+					5.Apply 6.Display dept 7.  
+					================================================
+					""");
+			System.out.println("Enter your choice: ");
+			ch=sc.nextInt();
+			switch(ch) {
+			case 1: 
+				obj.addDepartment();;
+				break;
+				
+			case 2:
+				obj.addEmployeeToDept();
+				break;
+				
+			case 3:
+				obj.removeEmployeeFromDept();
+				break;
+			
+			case 4:
+				obj.displayDepartmentEmp();
+				break;
+				
+			case 5: 
+				obj.applyRaiseToAll();
+				break;
+				
+			case 6:
+				obj.displayDepartment();
+				break;
+				
+			case 7:
+				obj.displayEmployeeCount();
+				break;
+			
+			default:
+				System.out.println("Invalid choice");
+			}
+		}while(ch!=7);
+	}
+}
