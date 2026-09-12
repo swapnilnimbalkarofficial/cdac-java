@@ -1,0 +1,636 @@
+Shop management system
+
+//Product.java
+
+public class Product {
+
+    private static int idGenerator = 1000;
+
+    private int id;
+    private String name;
+    private int price;
+
+    public Product(String name, int price) {
+        this.id = idGenerator++;
+        this.name = name;
+        this.price = price;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return "Product ID: " + id
+                + ", Name: " + name
+                + ", Price: " + price;
+    }
+}
+
+//ProductNotFoundException.java
+
+public class ProductNotFoundException extends RuntimeException {
+
+    public ProductNotFoundException(String message) {
+        super(message);
+    }
+}
+
+//Customer.java
+
+import java.util.ArrayList;
+
+public class Customer {
+
+    private static int idGenerator = 2000;
+
+    private int id;
+    private String name;
+    private long contactNumber;
+
+    private ArrayList<Product> products = new ArrayList<>();
+
+    public Customer(String name, long contactNumber) {
+        this.id = idGenerator++;
+        this.name = name;
+        this.contactNumber = contactNumber;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public long getContactNumber() {
+        return contactNumber;
+    }
+
+    public void setContactNumber(long contactNumber) {
+        this.contactNumber = contactNumber;
+    }
+
+    public ArrayList<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(ArrayList<Product> products) {
+        this.products = products;
+    }
+
+    public void addProduct(Product p) {
+        products.add(p);
+        System.out.println("Product added to customer.");
+    }
+
+    public void removeProduct(int id) {
+
+        for (Product p : products) {
+
+            if (p.getId() == id) {
+                products.remove(p);
+                System.out.println("Product removed successfully.");
+                return;
+            }
+        }
+
+        throw new ProductNotFoundException(
+                "Product with ID " + id + " not found in customer's purchases."
+        );
+    }
+
+    public void displayAllProduct() {
+
+        if (products.isEmpty()) {
+            System.out.println("No products purchased.");
+            return;
+        }
+
+        System.out.println("\n----- PURCHASED PRODUCTS -----");
+
+        for (Product p : products) {
+            System.out.println(p);
+        }
+    }
+
+    public int calculateBill() {
+
+        int total = 0;
+
+        for (Product p : products) {
+            total += p.getPrice();
+        }
+
+        return total;
+    }
+
+    @Override
+    public String toString() {
+        return "Customer ID: " + id
+                + ", Name: " + name
+                + ", Contact: " + contactNumber;
+    }
+}
+
+//Transaction
+
+import java.time.LocalDateTime;
+
+public class Transaction {
+
+    private static int idGenerator = 2000;
+
+    private int id;
+    private int customerID;
+    private int productID;
+    private String transactionType;
+    private LocalDateTime timestamp;
+
+    public Transaction(int customerID,
+                       int productID,
+                       String transactionType) {
+
+        this.id = idGenerator++;
+        this.customerID = customerID;
+        this.productID = productID;
+        this.transactionType = transactionType;
+        this.timestamp = LocalDateTime.now();
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getCustomerID() {
+        return customerID;
+    }
+
+    public void setCustomerID(int customerID) {
+        this.customerID = customerID;
+    }
+
+    public int getProductID() {
+        return productID;
+    }
+
+    public void setProductID(int productID) {
+        this.productID = productID;
+    }
+
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    public void setTransactionType(String transactionType) {
+        this.transactionType = transactionType;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction ID: " + id
+                + ", Customer ID: " + customerID
+                + ", Product ID: " + productID
+                + ", Type: " + transactionType
+                + ", Time: " + timestamp;
+    }
+}
+
+//Shop.java
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+
+public class Shop {
+
+    private ArrayList<Product> products = new ArrayList<>();
+    private ArrayList<Customer> customers = new ArrayList<>();
+    private ArrayList<Transaction> transactions = new ArrayList<>();
+
+    private final String path = "./src/resources/file.txt";
+
+    // ---------------- LOG TRANSACTION ----------------
+
+    public void logTransaction(String msg) {
+
+        try (FileOutputStream fos =
+                     new FileOutputStream(path, true)) {
+
+            fos.write((msg + System.lineSeparator())
+                    .getBytes(StandardCharsets.UTF_8));
+
+        } catch (FileNotFoundException e) {
+
+            System.out.println("File not found: "
+                    + e.getMessage());
+
+        } catch (IOException e) {
+
+            System.out.println("I/O Error: "
+                    + e.getMessage());
+        }
+    }
+
+    // ---------------- SEARCH CUSTOMER ----------------
+
+    public Customer getCustomerByID(int id) {
+
+        for (Customer c : customers) {
+
+            if (c.getId() == id) {
+                return c;
+            }
+        }
+
+        return null;
+    }
+
+    // ---------------- SEARCH PRODUCT ----------------
+
+    public Product getProductByID(int id) {
+
+        for (Product p : products) {
+
+            if (p.getId() == id) {
+                return p;
+            }
+        }
+
+        return null;
+    }
+
+    // ---------------- PURCHASE ----------------
+
+    public void purchase(int custID, int productID) {
+
+        Customer customer = getCustomerByID(custID);
+
+        if (customer == null) {
+            System.out.println("Customer not found.");
+            return;
+        }
+
+        Product product = getProductByID(productID);
+
+        if (product == null) {
+            System.out.println("Product not found.");
+            return;
+        }
+
+        customer.addProduct(product);
+
+        Transaction transaction =
+                new Transaction(
+                        custID,
+                        productID,
+                        "PURCHASE"
+                );
+
+        transactions.add(transaction);
+
+        logTransaction(transaction.toString());
+
+        System.out.println("Purchase successful.");
+    }
+
+    // ---------------- RETURN ----------------
+
+    public void getReturn(int custID, int productID) {
+
+        Customer customer = getCustomerByID(custID);
+
+        if (customer == null) {
+            System.out.println("Customer not found.");
+            return;
+        }
+
+        try {
+
+            customer.removeProduct(productID);
+
+            Transaction transaction =
+                    new Transaction(
+                            custID,
+                            productID,
+                            "RETURN"
+                    );
+
+            transactions.add(transaction);
+
+            logTransaction(transaction.toString());
+
+            System.out.println("Return successful.");
+
+        } catch (ProductNotFoundException e) {
+
+            System.out.println("Return failed: "
+                    + e.getMessage());
+        }
+    }
+
+    // ---------------- ADD PRODUCT ----------------
+
+    public void addProduct(Product p) {
+
+        products.add(p);
+
+        System.out.println(
+                "Product added successfully. ID = "
+                        + p.getId()
+        );
+    }
+
+    // ---------------- REMOVE PRODUCT ----------------
+
+    public void removeProduct(int productID) {
+
+        Product p = getProductByID(productID);
+
+        if (p == null) {
+            System.out.println("Product not found.");
+            return;
+        }
+
+        products.remove(p);
+
+        System.out.println("Product removed successfully.");
+    }
+
+    // ---------------- ADD CUSTOMER ----------------
+
+    public void addCustomer(Customer c) {
+
+        customers.add(c);
+
+        System.out.println(
+                "Customer added successfully. ID = "
+                        + c.getId()
+        );
+    }
+
+    // ---------------- REMOVE CUSTOMER ----------------
+
+    public void removeCustomer(int custID) {
+
+        Customer c = getCustomerByID(custID);
+
+        if (c == null) {
+            System.out.println("Customer not found.");
+            return;
+        }
+
+        customers.remove(c);
+
+        System.out.println("Customer removed successfully.");
+    }
+
+    // ---------------- DISPLAY CUSTOMERS ----------------
+
+    public void displayAllCustomers() {
+
+        if (customers.isEmpty()) {
+            System.out.println("No customers available.");
+            return;
+        }
+
+        System.out.println("\n========== CUSTOMERS ==========");
+
+        for (Customer c : customers) {
+            System.out.println(c);
+        }
+    }
+
+    // ---------------- DISPLAY PRODUCTS ----------------
+
+    public void displayAllProducts() {
+
+        if (products.isEmpty()) {
+            System.out.println("No products available.");
+            return;
+        }
+
+        System.out.println("\n========== PRODUCTS ==========");
+
+        for (Product p : products) {
+            System.out.println(p);
+        }
+    }
+}
+
+//Tester.java
+import java.util.Scanner;
+
+public class Tester {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        Shop shop = new Shop();
+
+        int choice;
+
+        do {
+
+            System.out.println("\n==============================");
+            System.out.println("      SHOP MANAGEMENT SYSTEM");
+            System.out.println("==============================");
+
+            System.out.println("1. ADD CUSTOMER");
+            System.out.println("2. ADD PRODUCT");
+            System.out.println("3. DISPLAY PRODUCTS");
+            System.out.println("4. DISPLAY CUSTOMERS");
+            System.out.println("5. REMOVE PRODUCT");
+            System.out.println("6. PURCHASE");
+            System.out.println("7. RETURN");
+            System.out.println("8. CALCULATE BILL");
+            System.out.println("9. EXIT");
+
+            System.out.print("Enter choice: ");
+            choice = sc.nextInt();
+
+            switch (choice) {
+
+                case 1:
+
+                    sc.nextLine();
+
+                    System.out.print("Enter customer name: ");
+                    String customerName = sc.nextLine();
+
+                    System.out.print("Enter contact number: ");
+                    long contact = sc.nextLong();
+
+                    Customer customer =
+                            new Customer(
+                                    customerName,
+                                    contact
+                            );
+
+                    shop.addCustomer(customer);
+
+                    break;
+
+                case 2:
+
+                    sc.nextLine();
+
+                    System.out.print("Enter product name: ");
+                    String productName = sc.nextLine();
+
+                    System.out.print("Enter product price: ");
+                    int price = sc.nextInt();
+
+                    Product product =
+                            new Product(
+                                    productName,
+                                    price
+                            );
+
+                    shop.addProduct(product);
+
+                    break;
+
+                case 3:
+
+                    shop.displayAllProducts();
+
+                    break;
+
+                case 4:
+
+                    shop.displayAllCustomers();
+
+                    break;
+
+                case 5:
+
+                    System.out.print("Enter product ID: ");
+                    int removeProductID = sc.nextInt();
+
+                    shop.removeProduct(removeProductID);
+
+                    break;
+
+                case 6:
+
+                    System.out.print("Enter customer ID: ");
+                    int purchaseCustomerID = sc.nextInt();
+
+                    System.out.print("Enter product ID: ");
+                    int purchaseProductID = sc.nextInt();
+
+                    shop.purchase(
+                            purchaseCustomerID,
+                            purchaseProductID
+                    );
+
+                    break;
+
+                case 7:
+
+                    System.out.print("Enter customer ID: ");
+                    int returnCustomerID = sc.nextInt();
+
+                    System.out.print("Enter product ID: ");
+                    int returnProductID = sc.nextInt();
+
+                    shop.getReturn(
+                            returnCustomerID,
+                            returnProductID
+                    );
+
+                    break;
+
+                case 8:
+
+                    System.out.print("Enter customer ID: ");
+                    int billCustomerID = sc.nextInt();
+
+                    Customer billCustomer =
+                            shop.getCustomerByID(
+                                    billCustomerID
+                            );
+
+                    if (billCustomer == null) {
+
+                        System.out.println(
+                                "Customer not found."
+                        );
+
+                    } else {
+
+                        billCustomer.displayAllProduct();
+
+                        System.out.println(
+                                "\nTotal Bill = ₹"
+                                        + billCustomer.calculateBill()
+                        );
+                    }
+
+                    break;
+
+                case 9:
+
+                    System.out.println(
+                            "Thank you for using Shop Management System."
+                    );
+
+                    break;
+
+                default:
+
+                    System.out.println(
+                            "Invalid choice."
+                    );
+            }
+
+        } while (choice != 9);
+
+        sc.close();
+    }
+}
